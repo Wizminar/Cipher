@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cipher · password strength, the way attackers count it</title>
+<meta name="description" content="Cipher shows how a password would actually be cracked: it finds dictionary words, symbol swaps, keyboard walks and dates, estimates real guesses, and checks breaches without your password leaving the browser.">
+<meta name="theme-color" content="#EDEFEA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16161F" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Cipher">
+<meta property="og:description" content="See how a password would actually be cracked. Runs entirely in your browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cipher.mohitupawar.com/">
+<link rel="icon" href="data:image/x-icon;base64,AAABAAEAHyAAAAEAIAAoEAAAFgAAACgAAAAfAAAAQAAAAAEAIAAAAAAAgA8AAHQSAAB0EgAAAAAAAAAAAAAgEwv/IBML/yATC/8gEwv/IBML/yASDP8gEgz/IBML/yATC/8gEwv/IBML/yATDP8gEwz/IRMM/yETDP8hEwz/IRMM/yETDP8gEwz/IBMM/yATC/8gEwv/IBML/yATDP8gEgz/IBIM/yASDP8gEwv/IBML/yATC/8gEwv/IBML/yATC/8gEgz/IBIM/yASDP8gEwv/IBIL/yASC/8gEwz/IRMM/yETDP8hEw3/IRMN/yATDf8gEw3/IBMN/yATDf8gEw3/IRMN/yETDf8hEwz/IRMM/yATDP8gEwv/IBML/yATC/8gEwv/IBIM/yASDP8gEwv/IBML/yATC/8gEwv/IBIM/yASDP8gEgz/IBML/yEUDP8hEg3/IRMN/yATDf8hFA7/IRQO/yAUDv8gFA7/IBQO/yAUDv8gFA7/IBQO/yEUDv8hFA7/IBQO/yETDf8hEw3/IRMN/yATDP8gEwv/IBML/yASDP8gEgz/IBML/yATC/8gEgz/IBIM/yATC/8gEwv/IBIM/yETDP8hEw3/IBMN/yAUDv8gFA//IBQP/yAUD/8gFBD/IBQQ/yAUEP8gFBD/IBQQ/yAUEP8gFBD/IBQP/yAUD/8gFA//IRQO/yETDf8hEw3/IRMN/yASDP8gEwv/IBML/yASDP8gEwv/IBIM/yASDP8gEwv/IBML/yETDf8hEw3/IhQO/yAUDv8gFA7/IBQQ/yAVEf8gFRH/IRUS/yEWEv8hFhL/IRYS/yEWEv8gFhL/IRYS/yAVEf8hFRH/IBQQ/yAUDv8gFA7/IBQO/yETDf8hEw3/IBML/yATC/8gEgz/IBIM/yATC/8gEwv/IBIM/yETDf8iEw3/IRQP/yAUEP8fFBD/IBcU/yEWE/8hFRD/IRUR/yEWEf8hFhH/IRYR/yEWEf8gFhH/IBYR/yEWEf8hFRH/IRUR/yEWE/8fFxT/IBQQ/yAUEP8hFA//IRMN/yETDf8gEgz/IBML/yATC/8gEwv/IBML/yETDf8hEw3/IhQO/yEUDv8gFRL/IBUR/yELAf8gEQr/IBkX/x8ZGP8fGhj/HhoY/x4bGP8eGxn/HhsY/x4aGP8fGhj/HhkY/yAZF/8hEQr/IQwB/yAV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Ef8hFRH/IRUR/yEVEf8hFRD/IBYS/yAXFP8gFRH/IBQQ/yAUD/8fEw7/IBMN/yATDf8hEw3/IBIM/yASDP8gEgz/IRMN/yATDf8fEw3/HxMO/yAUD/8gFBD/IBQQ/yAVEf8gFRH/IBUR/yAWEv8gFhL/IRYS/yEWEv8hFhL/IRYS/yAWEv8gFhL/IBUR/yAVEf8gFBD/IBQQ/yAUEP8fEw3/HxMN/yETDf8hEw3/IBIM/yASDP8gEgz/IBIM/yASDP8hEw3/IRMN/yATDf8fEw3/HxMO/yAUDv8gFBD/IBQQ/yAUEP8gFRH/IBUR/yAVEf8gFRH/IBUR/yAVEf8gFRH/IBQQ/yAUEP8gFBD/IBQP/x8TDv8fEw3/IBMN/yETDf8hEw3/IRMN/yASDP8gEgz/IBML/yATDP8hEw3/IRMN/yETDf8gEw3/HxMN/x8TDf8fEw3/HxMO/yATDv8gFBD/IBQQ/yAUEP8gFBD/IBQQ/yAUEP8gFBD/IBQQ/yAUEP8gFBD/IBMO/x8TDf8fEw3/HxMN/yATDf8hEw3/IRMN/yETDf8gEwv/IBML/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+<link rel="stylesheet" href="style.css">
+<!-- Applies a saved colour theme before first paint. Allowed by its hash in the CSP (netlify.toml). -->
+<script>try{var t=localStorage.getItem("cipher-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>
+<script src="script.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#pw">Skip to the password field</a>
+
+<header class="top">
+  <div class="shell top-inner">
+    <a class="wordmark" href="#" aria-label="Cipher, back to top">cipher<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Sections">
+      <a href="#generate">Generate</a>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/Wizminar/Cipher" rel="noopener">Source</a>
+      <button class="theme" id="theme" type="button" aria-label="Switch colour theme">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ AUDIT ============ -->
+  <section class="audit shell" aria-labelledby="audit-title">
+    <h1 id="audit-title">Type a password. See&nbsp;how it would be&nbsp;cracked.</h1>
+    <p class="lede">Cipher reads your password the way cracking tools do: words, swaps, keyboard runs, dates. Then it counts the guesses. All of this happens on this page: your password is never sent anywhere.</p>
+
+    <div class="stage" id="stage">
+      <label for="pw" class="visually-hidden">Password to audit</label>
+      <div class="pw-wrap" id="pwWrap">
+        <div class="pw-mirror" id="mirror" aria-hidden="true"></div>
+        <textarea id="pw" rows="1" maxlength="128" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
+          aria-describedby="summary" placeholder="P@ssw0rd2024!"></textarea>
+      </div>
+      <div class="stage-tools">
+        <button type="button" class="link-btn" id="reveal" aria-pressed="true">Hide</button>
+        <button type="button" class="link-btn" id="clear">Clear</button>
+        <span class="tool-sep" aria-hidden="true"></span>
+        <span class="try">Try
+          <button type="button" class="link-btn sample" data-sample="P@ssw0rd2024!">P@ssw0rd2024!</button>
+          <button type="button" class="link-btn sample" data-sample="1qaz2wsx">1qaz2wsx</button>
+          <button type="button" class="link-btn sample" data-sample="correct horse battery staple">correct horse battery staple</button>
+        </span>
+      </div>
+    </div>
+
+    <div class="results" id="results" data-empty="true">
+      <p class="empty-note" id="emptyNote">Start typing above, or tap one of the examples.</p>
+
+      <div class="summary" id="summary" aria-live="polite">
+        <div class="score">
+          <span class="score-num" id="bits">0</span>
+          <span class="score-unit">bits</span>
+          <span class="verdict" id="verdict"></span>
+        </div>
+        <p class="score-line" id="scoreLine"></p>
+      </div>
+
+      <div class="gap" aria-label="Textbook entropy compared with realistic entropy">
+        <div class="gap-row">
+          <span class="gap-label">What the textbook formula says</span>
+          <div class="gap-track"><div class="gap-bar naive" id="naiveBar"></div></div>
+          <span class="gap-val" id="naiveVal">0</span>
+        </div>
+        <div class="gap-row">
+          <span class="gap-label">What a cracking tool sees</span>
+          <div class="gap-track"><div class="gap-bar real" id="realBar"></div></div>
+          <span class="gap-val" id="realVal">0</span>
+        </div>
+        <div class="gap-scale" aria-hidden="true"><span>0</span><span>32</span><span>64</span><span>96</span><span>128 bits</span></div>
+      </div>
+
+      <div class="grid-2">
+        <section aria-labelledby="reads-title">
+          <h2 id="reads-title">How an attacker reads it</h2>
+          <ol class="pieces" id="pieces"></ol>
+        </section>
+
+        <section aria-labelledby="crack-title">
+          <h2 id="crack-title">Time to crack</h2>
+          <table class="crack">
+            <tbody id="crackRows"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <section class="breach" aria-labelledby="breach-title">
+        <h2 id="breach-title">Known breaches</h2>
+        <p class="breach-status" id="breachStatus" aria-live="polite">Not checked yet.</p>
+        <div class="breach-actions">
+          <button type="button" class="btn" id="breachBtn">Check breaches</button>
+          <span class="breach-hint">or press Enter. Sends 5 characters of the password's hash, nothing else.</span>
+        </div>
+        <dl class="wire" id="wire" hidden>
+          <div><dt>Hashed here (SHA-1)</dt><dd><span class="sent" id="wPrefix"></span><span class="kept" id="wSuffix"></span></dd></div>
+          <div><dt>Sent to Have I Been Pwned</dt><dd id="wSent"></dd></div>
+          <div><dt>Hashes it sent back</dt><dd id="wBack"></dd></div>
+          <div><dt>Compared on this page</dt><dd id="wMatch"></dd></div>
+        </dl>
+      </section>
+
+      <section class="advice" aria-labelledby="advice-title" id="adviceBlock">
+        <h2 id="advice-title">Making it stronger</h2>
+        <ul id="advice"></ul>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============ GENERATE ============ -->
+  <section class="generate" id="generate" aria-labelledby="gen-title">
+    <div class="shell">
+      <h2 class="section-title" id="gen-title">Make one that holds up</h2>
+      <p class="section-lede">Generated with your browser's cryptographic random number generator. Passphrases use the EFF's 7,776-word list, so each word adds 12.9 bits.</p>
+
+      <div class="gen">
+        <div class="tabs" role="tablist" aria-label="Kind of password">
+          <button role="tab" id="tab-phrase" aria-selected="true" aria-controls="panel-phrase" type="button">Passphrase</button>
+          <button role="tab" id="tab-random" aria-selected="false" aria-controls="panel-random" type="button" tabindex="-1">Random characters</button>
+        </div>
+
+        <div class="gen-panel" role="tabpanel" id="panel-phrase" aria-labelledby="tab-phrase">
+          <label class="range">
+            <span>Words <output id="wordsOut">6</output></span>
+            <input type="range" id="words" min="3" max="10" value="6">
+          </label>
+          <label class="field">
+            <span>Between words</span>
+            <select id="sep">
+              <option value="-">hyphen</option>
+              <option value=" ">space</option>
+              <option value=".">dot</option>
+              <option value="_">underscore</option>
+              <option value="">nothing</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" id="caps"> Capitalise each word</label>
+        </div>
+
+        <div class="gen-panel" role="tabpanel" id="panel-random" aria-labelledby="tab-random" hidden>
+          <label class="range">
+            <span>Length <output id="lenOut">20</output></span>
+            <input type="range" id="len" min="8" max="64" value="20">
+          </label>
+          <fieldset class="sets">
+            <legend>Use</legend>
+            <label class="check"><input type="checkbox" name="set" value="lower" checked> a–z</label>
+            <label class="check"><input type="checkbox" name="set" value="upper" checked> A–Z</label>
+            <label class="check"><input type="checkbox" name="set" value="digits" checked> 0–9</label>
+            <label class="check"><input type="checkbox" name="set" value="symbols" checked> symbols</label>
+          </fieldset>
+        </div>
+
+        <output class="gen-out" id="genOut" aria-live="polite"></output>
+        <p class="gen-bits" id="genBits"></p>
+        <div class="gen-actions">
+          <button type="button" class="btn" id="regen">Generate another</button>
+          <button type="button" class="btn ghost" id="copy">Copy</button>
+          <button type="button" class="btn ghost" id="useGen">Audit this one</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW ============ -->
+  <section class="how shell" id="how" aria-labelledby="how-title">
+    <h2 class="section-title" id="how-title">How it works</h2>
+
+    <article class="idea">
+      <h3>The formula everyone quotes is too generous</h3>
+      <div class="idea-body">
+        <p>The usual measure of strength is <code>length × log₂(pool)</code>: a 13-character password using all four character types gets about 85 bits. That's only true if every character were picked at random. People don't do that, and attackers know it.</p>
+        <p>Cracking tools start with leaked password lists, dictionaries, names, years and keyboard runs, then apply rules like capitalising the first letter or swapping <code>a</code> for <code>@</code>. So Cipher looks for every one of those patterns, gives each an estimated guess count, and then searches for the <em>cheapest</em> way to split the password into pieces:</p>
+        <pre class="formula">guesses = k! × (guesses for piece 1 × … × piece k) + 10000<sup>k−1</sup></pre>
+        <p>The <code>k!</code> covers the different orders the pieces could appear in. The last term stops the search from chopping a password into lots of tiny cheap pieces. This is the approach behind Dropbox's zxcvbn, rewritten here from scratch with its own lists and tests.</p>
+      </div>
+    </article>
+
+    <article class="idea">
+      <h3>Checking a breach list without revealing the password</h3>
+      <div class="idea-body">
+        <p>Sending your password to a server to ask "has this leaked?" would be a leak in itself. The Pwned Passwords range API uses k-anonymity instead:</p>
+        <ol class="steps">
+          <li>Your browser hashes the password with SHA-1.</li>
+          <li>Only the first 5 characters of the hash are sent. Around a million passwords share any given 5-character prefix.</li>
+          <li>The API sends back every breached hash with that prefix, usually 800 to 1,000 of them, padded with decoys so the response size reveals nothing either.</li>
+          <li>Your browser looks for the rest of the hash in that list. The answer never leaves the page.</li>
+        </ol>
+        <p>Cipher only checks when you ask. Checking automatically as you type would send a prefix for every version you paused on (<code>d</code>, <code>dr</code>, <code>dra</code>…). Anyone watching could then try each possible next character until the next prefix matched, and rebuild the password one character at a time.</p>
+        <p>SHA-1 is used here only because it's the format the API expects. It would be a bad choice for <em>storing</em> passwords, which is exactly why the next point matters.</p>
+      </div>
+    </article>
+
+    <article class="idea">
+      <h3>Crack time depends on the website too</h3>
+      <div class="idea-body">
+        <p>The same password can survive for centuries or fall in minutes depending on how the site stores it. A login form with lockouts allows a few guesses an hour. A stolen database of bcrypt hashes allows thousands a second. Unsalted MD5 or SHA-1 lets a rig of GPUs try a hundred billion a second. Cipher shows all four, because you can't know which kind of site you're trusting.</p>
+      </div>
+    </article>
+
+    <article class="idea">
+      <h3>Honest limitations</h3>
+      <div class="idea-body">
+        <p>Estimates are only as good as the lists behind them: about 10,000 common passwords, 9,500 English words and 4,900 first names. Real attackers have bigger lists and personal context like your pet's name, so treat any score as an upper bound. Attack rates are round figures for realistic setups, not measurements of any specific attacker.</p>
+      </div>
+    </article>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="shell foot-inner">
+    <p>Built by <a href="https://mohitupawar.com/" rel="noopener">Mohit Pawar</a>. Plain HTML, CSS and JavaScript modules, no frameworks, no tracking.</p>
+    <p><a href="https://github.com/Wizminar/Cipher" rel="noopener">Source on GitHub</a><a href="https://haveibeenpwned.com/Passwords" rel="noopener">Pwned Passwords</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+[build]
+  # Only the files the app needs are published: no tests, scripts or package files.
+  publish = "dist"
+  command = "npm run build"
+
+# A security tool should ship the headers it would recommend.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'none'; script-src 'self' 'sha256-73CNPSG1fa5qGFGuONLBCkJm58lOFnnows5SmithDeQ='; style-src 'self'; font-src data:; img-src 'self' data:; connect-src 'self' https://api.pwnedpasswords.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Resource-Policy = "same-origin"
+    X-Frame-Options = "DENY"
