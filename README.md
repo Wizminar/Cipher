@@ -4,7 +4,7 @@
 
 A single-page tool that measures password strength in **bits of entropy** and checks a password against real-world breaches — **without the password ever leaving the browser**.
 
-**Live demo:** [add your URL]
+**Live demo:** https://cipher.mohitupawar.com
 
 ## Two ideas this tool is built on
 
