@@ -8,11 +8,24 @@
 
 **Live:** https://cipher.mohitupawar.com
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/preview-dark.png">
+  <img alt="Cipher analysing P@ssw0rd2024!: the dictionary word and the year are highlighted, the password is struck through as breached, and it scores 27 realistic bits against 85 from the textbook formula" src=".github/preview-light.png">
+</picture>
+
 | | Textbook formula | Cipher's estimate |
 |---|---|---|
 | `P@ssw0rd2024!` | 85 bits, "strong" | **27 bits**, guessed in ~100 million tries |
 | `1qaz2wsx` | 41 bits | **9 bits**, on every cracking list |
 | `correct horse battery staple` | 165 bits | **91 bits**, genuinely strong |
+
+## Highlights
+
+- **A strength engine written from scratch:** pattern matchers plus a dynamic-programming search over how a password can be split up, the approach behind Dropbox's zxcvbn.
+- **Privacy by design:** the password never leaves the browser, and the breach check uses k-anonymity. Building it uncovered (and fixed) a subtle leak: checking as you type gives the password away through related hash prefixes.
+- **Security engineering:** a strict CSP with no `unsafe-*`, a hashed inline snippet, locked-down headers, no third-party requests, and deploys that publish only the site files.
+- **Tested:** 70 tests across the engine, breach check, generator, UI and security config, run in CI on every push.
+- **Small and dependency-free:** three files, no framework, no build step, and it works when `index.html` is opened from disk.
 
 ## What it does
 
@@ -105,6 +118,10 @@ npm run build && node scripts/serve-prod.mjs   # dist/ with the real production 
 ```
 
 You can also just open `index.html` in a browser; no server is needed. After changing anything in `scripts/raw/`, run `npm run build:data` to update the word lists in `script.js`.
+
+## Deploy
+
+Netlify reads `netlify.toml`: it runs `npm run build`, publishes only `dist/` (the three site files), and applies the security headers. Any static host works if you copy `index.html`, `style.css` and `script.js` and set the same headers.
 
 ## Credits
 
