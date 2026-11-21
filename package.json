@@ -1,0 +1,18 @@
+{
+  "name": "cipher",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Pattern-aware password strength estimation and privacy-preserving breach checks, entirely in the browser.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "build": "node scripts/build.mjs",
+    "dev": "npx --yes serve -l 5173 .",
+    "build:data": "node scripts/build-data.mjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "happy-dom": "^21.0.4",
+    "vitest": "^5.1.1"
+  }
+}

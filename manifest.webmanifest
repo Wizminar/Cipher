@@ -1,0 +1,11 @@
+{
+  "name": "Cipher",
+  "short_name": "Cipher",
+  "description": "See how a password would actually be cracked. Runs entirely in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EDEFEA",
+  "theme_color": "#1D1B2F",
+  "icons": [{ "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
