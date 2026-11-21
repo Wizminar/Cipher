@@ -22,4 +22,4 @@ jobs:
       - name: Data modules are up to date
         run: |
           npm run build:data
-          git diff --exit-code js/data
+          git diff --exit-code script.js

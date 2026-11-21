@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { analyze, estimate, naiveBits } from "../js/engine/index.js";
-import { spatialMatches, sequenceMatches, dateMatches, dictionaryMatches } from "../js/engine/matchers.js";
-import { direction } from "../js/engine/keyboard.js";
-import { poolSize, nCk } from "../js/engine/math.js";
-import { formatDuration, formatCount } from "../js/engine/crack.js";
+import "../script.js";
+
+const {
+  analyze, estimate, naiveBits,
+  spatialMatches, sequenceMatches, dateMatches, dictionaryMatches,
+  direction, poolSize, nCk, formatDuration, formatCount,
+} = globalThis.Cipher;
 
 const patterns = (pw) => estimate(pw).sequence.map((p) => p.pattern);
 

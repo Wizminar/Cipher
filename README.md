@@ -21,7 +21,7 @@
 - **Crack time under four threat models.** Rate-limited login, unthrottled login, stolen bcrypt database and stolen fast-hash database, because the website's storage choices matter as much as the password.
 - **Private breach check (k-anonymity).** SHA-1 in the browser, with only a 5-character prefix sent to the Have I Been Pwned range API. Response padding is on, matching happens locally, and the page shows exactly what was sent and what came back. It runs only when you ask (see the threat model for why).
 - **Generator.** Diceware-style passphrases from the EFF large wordlist, or random characters, using `crypto.getRandomValues` with rejection sampling so there's no modulo bias.
-- **Works offline** as an installable PWA (the strength meter and generator need no network).
+- **Just three files.** `index.html`, `style.css` and `script.js`, with no build step to run the site. Open `index.html` straight from disk and it works.
 
 ## How the estimate works
 
@@ -46,37 +46,39 @@ guesses = k! × Π(piece guesses) + 10000^(k−1)
 
 ## Architecture
 
+The website is three files in the repo root:
+
 ```
-index.html            page shell, no inline scripts or styles
-css/style.css         design tokens, light + dark themes
-js/
-  main.js             UI controller (rendering, debounced breach checks, generator)
-  breach.js           SHA-1 via Web Crypto, HIBP range API, padding, caching
-  generator.js        CSPRNG + rejection sampling, EFF passphrases
-  engine/
-    matchers.js       dictionary / l33t / spatial / sequence / repeat / date matchers
-    estimate.js       minimum-guess DP search + naive entropy
-    keyboard.js       slanted QWERTY adjacency graph
-    crack.js          threat models, duration and count formatting
-    index.js          analyze(): verdicts, descriptions, advice
-  data/               word lists as ES modules (generated)
-scripts/build-data.mjs  builds js/data from scripts/raw
-scripts/build.mjs       copies the public files into dist/
-scripts/serve-prod.mjs  serves dist/ with the netlify.toml headers, for testing the CSP
-tests/                Vitest suites: engine, breach + generator, UI (happy-dom), security
-sw.js                 offline cache (never caches the breach API)
-netlify.toml          security headers
+index.html     page markup, plus one tiny hashed snippet that applies the saved theme before first paint
+style.css      design tokens, light and dark themes, fonts embedded as data URIs
+script.js      all the logic, as one plain script in ten sections:
+                 1. math helpers            6. analysis: verdicts, descriptions, advice
+                 2. QWERTY keyboard graph   7. breach check (k-anonymity)
+                 3. pattern matchers        8. password / passphrase generator
+                 4. minimum-guess search    9. page controller
+                 5. crack-time scenarios   10. word lists (generated)
 ```
 
-No framework, no bundler, no runtime dependencies. Vitest and happy-dom are the only dev dependencies.
+Development files, which are never deployed:
+
+```
+tests/                  Vitest suites: engine, breach + generator, UI (happy-dom), security
+scripts/raw/            source word lists
+scripts/build-data.mjs  rewrites the word-list section of script.js from scripts/raw
+scripts/build.mjs       copies the three site files into dist/
+scripts/serve-prod.mjs  serves dist/ with the netlify.toml headers, for testing the CSP
+netlify.toml            deploy settings and security headers
+```
+
+`script.js` wraps everything in one function, so nothing leaks into the page's global scope except `window.Cipher`, which the tests use. No framework, no bundler, no runtime dependencies. Vitest and happy-dom are the only dev dependencies.
 
 ## Security and threat model
 
 - **What leaves the browser:** a 5-hex-character SHA-1 prefix, sent to `api.pwnedpasswords.com` without cookies or a referrer, and only when the user presses *Check breaches* or Enter. About a million passwords share any given prefix, and the `Add-Padding` header hides the true size of the response.
-- **What doesn't:** the password, its full hash, and the match result. There's no analytics, no backend, and no third-party CDN: fonts are self-hosted, so loading the page tells no one else you visited.
+- **What doesn't:** the password, its full hash, and the match result. There's no analytics, no backend, and no third-party CDN: the fonts are embedded in `style.css`, so loading the page tells no one else you visited.
 - **Why there's no "check as you type":** an earlier version did this, and it broke k-anonymity. Each pause sent the prefix for a slightly longer string (`d`, `dr`, `dra`…). Anyone watching could try each possible next character, keep the one whose hash matched the next prefix, and rebuild the password one character at a time. Checks are now explicit, and a test fails if typing ever triggers a request.
-- **Headers** (in `netlify.toml`): a strict Content Security Policy (`default-src 'none'`, everything else `'self'`, `connect-src` adds only HIBP, `frame-ancestors 'none'`), HSTS, `Referrer-Policy: no-referrer`, a locked-down `Permissions-Policy`, COOP/CORP and `nosniff`. There are no inline scripts or styles, which is why the theme bootstrap lives in its own file.
-- **Deployment** publishes only `dist/` (built by `npm run build`), so tests, scripts and package files are never served.
+- **Headers** (in `netlify.toml`): a strict Content Security Policy (`default-src 'none'`, everything else `'self'`, `connect-src` adds only HIBP, `frame-ancestors 'none'`), HSTS, `Referrer-Policy: no-referrer`, a locked-down `Permissions-Policy`, COOP/CORP and `nosniff`. The only inline code is the one-line theme snippet, which the CSP allows by its SHA-256 hash rather than with `unsafe-inline`. A test recomputes that hash, so editing the snippet without updating the CSP fails the build.
+- **Deployment** publishes only `dist/` (the three site files, copied by `npm run build`), so tests, scripts and package files are never served.
 - **Responses are validated:** malformed lines from the API are ignored, and results that come back after the password changed are discarded.
 - **Input handling:** the password field is a `textarea` overlaid on a rendered mirror, so password managers don't offer to save the audited value. All rendering uses `textContent`, never `innerHTML`.
 - **SHA-1** is used only because the HIBP API requires it. It's a lookup key, not password storage.
@@ -85,8 +87,8 @@ No framework, no bundler, no runtime dependencies. Vitest and happy-dom are the 
 
 - **Engine:** every matcher, the minimum-guess search, the naive formula, edge cases (128-character worst cases under 250 ms, emoji and non-Latin text, empty input), and that verdicts rise with strength.
 - **Breach + generator:** SHA-1 output, that only the prefix is sent with padding on, malformed-response handling, rejection sampling (including a rigged RNG), uniformity, and EFF passphrases.
-- **UI** (real `index.html` + `main.js` in happy-dom): rendering, caret alignment, hide mode leaking nothing, hostile input rendered as text, no network while typing, stale results dropped, offline errors.
-- **Security:** the CSP has no `unsafe-*`, the page has no inline code and loads nothing cross-origin, there's no `innerHTML`/`eval`, only `breach.js` makes requests, the offline cache lists every file and skips cross-origin requests, and `dist/` contains only public files.
+- **UI** (real `index.html` + `script.js` in happy-dom): rendering, caret alignment, hide mode leaking nothing, hostile input rendered as text, no network while typing, stale results dropped, offline errors.
+- **Security:** the CSP has no `unsafe-*` and its hash matches the theme snippet, the page loads only `style.css` and `script.js`, there's no `innerHTML`/`eval`, only the breach section makes requests, `script.js` stays a plain script that exposes only `window.Cipher`, and `dist/` contains exactly the three site files.
 
 ## Limitations
 
@@ -97,15 +99,15 @@ No framework, no bundler, no runtime dependencies. Vitest and happy-dom are the 
 
 ```bash
 npm install
-npm test                          # 69 tests: engine, breach, generator, UI, security
+npm test                          # 70 tests: engine, breach, generator, UI, security
 npm run dev                       # serves on http://localhost:5173
 npm run build && node scripts/serve-prod.mjs   # dist/ with the real production headers
 ```
 
-The breach check needs a secure context (HTTPS or `localhost`).
+You can also just open `index.html` in a browser; no server is needed. After changing anything in `scripts/raw/`, run `npm run build:data` to update the word lists in `script.js`.
 
 ## Credits
 
-Approach inspired by [zxcvbn](https://github.com/dropbox/zxcvbn) (Wheeler, USENIX Security 2016). Word lists: [SecLists](https://github.com/danielmiessler/SecLists), [google-10000-english](https://github.com/first20hours/google-10000-english), [EFF large wordlist](https://www.eff.org/dice). Breach data: [Have I Been Pwned](https://haveibeenpwned.com/Passwords).
+Approach inspired by [zxcvbn](https://github.com/dropbox/zxcvbn) (Wheeler, USENIX Security 2016). Word lists: [SecLists](https://github.com/danielmiessler/SecLists), [google-10000-english](https://github.com/first20hours/google-10000-english), [EFF large wordlist](https://www.eff.org/dice). Breach data: [Have I Been Pwned](https://haveibeenpwned.com/Passwords). Fonts: Martian Mono (Evil Martians) and Schibsted Grotesk (Schibsted), both under the SIL Open Font License 1.1.
 
 Built by [Mohit Pawar](https://mohitupawar.com/).

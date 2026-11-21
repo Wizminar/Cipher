@@ -25,7 +25,7 @@ beforeAll(async () => {
   globalThis.fetch = fetchMock;
   window.fetch = fetchMock;
   document.body.innerHTML = body.replace(/<script[\s\S]*?<\/script>/g, "");
-  await import("../js/main.js");
+  await import("../script.js");
 });
 
 beforeEach(() => {

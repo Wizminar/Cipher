@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { sha1Hex, parseRange, checkBreach } from "../js/breach.js";
-import { randomInt, passphrase, randomPassword, SETS } from "../js/generator.js";
+import "../script.js";
+
+const { sha1Hex, parseRange, checkBreach, randomInt, passphrase, randomPassword, SETS } = globalThis.Cipher;
 
 describe("breach check", () => {
   it("hashes with SHA-1 in uppercase hex", async () => {
